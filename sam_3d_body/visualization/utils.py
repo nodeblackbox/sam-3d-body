@@ -5,7 +5,10 @@ from typing import Dict, Optional, Union
 
 import cv2
 import numpy as np
-from detectron2.config import LazyConfig
+try:
+    from detectron2.config import LazyConfig
+except ImportError:
+    LazyConfig = None
 from omegaconf import OmegaConf
 
 

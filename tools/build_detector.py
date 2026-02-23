@@ -19,6 +19,12 @@ class HumanDetector:
 
             self.detector = self.detector.to(self.device)
             self.detector.eval()
+        elif name == "yolov8":
+            print("########### Using human detector: YOLOv8...")
+            from ultralytics import YOLO
+            self.detector = YOLO("yolov8n.pt")
+            self.detector.to(self.device)
+            self.detector_func = run_yolov8
         elif name == "sam3":
             from sam3.model_builder import build_sam3_image_model
             from sam3.model.sam3_image_processor import Sam3Processor
@@ -134,4 +140,48 @@ def run_detectron2_vitdet(
         (boxes[:, 3], boxes[:, 2], boxes[:, 1], boxes[:, 0])
     )  # shape: [len(boxes),]
     boxes = boxes[sorted_indices]
+    return boxes
+
+
+def run_yolov8(
+    detector,
+    img,
+    det_cat_id: int = 0,
+    bbox_thr: float = 0.5,
+    nms_thr: float = 0.3,
+    default_to_full_image: bool = True,
+):
+    height, width = img.shape[:2]
+    # Run YOLOv8 inference (usually BGR is fine if coming from cv2)
+    results = detector(img, verbose=False)
+    boxes = []
+    
+    for r in results:
+        for box in r.boxes:
+            if int(box.cls[0]) == det_cat_id and box.conf[0] > bbox_thr:
+                boxes.append(box.xyxy[0].cpu().numpy())
+                
+    if len(boxes) == 0 and default_to_full_image:
+        boxes = np.array([[0, 0, width, height]])
+    elif len(boxes) == 0:
+        boxes = np.empty((0, 4))
+    else:
+        boxes = np.array(boxes)
+        # Expand boxes slightly so SAM crop is not too tight
+        expanded_boxes = []
+        for b in boxes:
+            x1, y1, x2, y2 = b
+            w = x2 - x1
+            h = y2 - y1
+            # Expand by 10%
+            new_x1 = max(0, x1 - 0.1 * w)
+            new_y1 = max(0, y1 - 0.1 * h)
+            new_x2 = min(width, x2 + 0.1 * w)
+            new_y2 = min(height, y2 + 0.1 * h)
+            expanded_boxes.append([new_x1, new_y1, new_x2, new_y2])
+            
+        boxes = np.array(expanded_boxes)
+        sorted_indices = np.lexsort((boxes[:, 3], boxes[:, 2], boxes[:, 1], boxes[:, 0]))
+        boxes = boxes[sorted_indices]
+        
     return boxes

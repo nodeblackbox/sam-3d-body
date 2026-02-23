@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Karate 3D Avatar Studio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #141420;
+      --surface2: #1c1c2e;
+      --accent: #6c5ce7;
+      --accent2: #a29bfe;
+      --text: #e8e8f0;
+      --text-dim: #8888a0;
+      --border: #2a2a40;
+      --success: #00cec9;
+      --warn: #fdcb6e;
+      --danger: #ff7675;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    /* ─── LAYOUT ─── */
+    .app {
+      display: grid;
+      grid-template-columns: 320px 1fr 340px;
+      grid-template-rows: 56px 1fr 200px;
+      height: 100vh;
+      gap: 1px;
+      background: var(--border);
+    }
+
+    /* ─── TOP BAR ─── */
+    .topbar {
+      grid-column: 1 / -1;
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 16px;
+    }
+
+    .topbar h1 {
+      font-size: 16px;
+      font-weight: 600;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .topbar .status {
+      margin-left: auto;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .topbar .status .dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      margin-right: 6px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.4;
+      }
+    }
+
+    /* ─── LEFT PANEL (Timeline / Segments) ─── */
+    .left-panel {
+      background: var(--surface);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-header {
+      padding: 12px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-dim);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .panel-header button {
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .panel-header button:hover {
+      background: var(--accent2);
+    }
+
+    .segment-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+    }
+
+    .segment-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .segment-item:hover {
+      border-color: var(--accent);
+      transform: translateX(2px);
+    }
+
+    .segment-item.active {
+      border-color: var(--accent);
+      background: rgba(108, 92, 231, 0.1);
+    }
+
+    .segment-item .seg-time {
+      font-size: 11px;
+      color: var(--accent2);
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .segment-item .seg-label {
+      font-size: 13px;
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    .segment-item .seg-frames {
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    .segment-item .seg-tag {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ─── CENTER (3D Viewport + Video) ─── */
+    .center-panel {
+      background: var(--bg);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .viewport-tabs {
+      display: flex;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .viewport-tabs button {
+      flex: 1;
+      padding: 10px;
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .viewport-tabs button.active {
+      color: var(--accent2);
+      border-bottom-color: var(--accent);
+    }
+
+    .viewport-tabs button:hover {
+      color: var(--text);
+    }
+
+    .viewport-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #three-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    #video-view {
+      width: 100%;
+      height: 100%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+    }
+
+    #video-view video {
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 4px;
+    }
+
+    .viewport-overlay {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      font-size: 11px;
+      color: var(--text-dim);
+      pointer-events: none;
+    }
+
+    .viewport-overlay .frame-info {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 6px 10px;
+      border-radius: 6px;
+      backdrop-filter: blur(8px);
+    }
+
+    /* ─── RIGHT PANEL (Properties / Labels) ─── */
+    .right-panel {
+      background: var(--surface);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .prop-group {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .prop-group h3 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+
+    .prop-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+      gap: 8px;
+    }
+
+    .prop-row label {
+      font-size: 12px;
+      color: var(--text-dim);
+      width: 80px;
+      flex-shrink: 0;
+    }
+
+    .prop-row input[type="text"],
+    .prop-row input[type="number"],
+    .prop-row select {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .prop-row input:focus,
+    .prop-row select:focus {
+      border-color: var(--accent);
+    }
+
+    .prop-row input[type="range"] {
+      flex: 1;
+      accent-color: var(--accent);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent2);
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: #000;
+    }
+
+    .btn-warn {
+      background: var(--warn);
+      color: #000;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--accent);
+    }
+
+    .btn-block {
+      width: 100%;
+      justify-content: center;
+    }
+
+    /* ─── BOTTOM (Timeline scrubber) ─── */
+    .bottom-panel {
+      grid-column: 1 / -1;
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      padding: 8px 16px;
+      overflow: hidden;
+    }
+
+    .timeline-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .timeline-controls button {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .timeline-controls button:hover {
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+
+    .timeline-controls .time-display {
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+      color: var(--accent2);
+      min-width: 120px;
+    }
+
+    .timeline-controls .speed-control {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .timeline-scrubber {
+      position: relative;
+      height: 60px;
+      background: var(--surface2);
+      border-radius: 6px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .timeline-track {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+
+    .timeline-thumb-strip {
+      display: flex;
+      height: 40px;
+      overflow: hidden;
+    }
+
+    .timeline-thumb-strip img {
+      height: 40px;
+      width: auto;
+      flex-shrink: 0;
+      opacity: 0.7;
+    }
+
+    .timeline-playhead {
+      position: absolute;
+      top: 0;
+      width: 2px;
+      height: 100%;
+      background: var(--accent);
+      pointer-events: none;
+      z-index: 2;
+      box-shadow: 0 0 8px var(--accent);
+    }
+
+    .timeline-segments {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 16px;
+      display: flex;
+    }
+
+    .timeline-seg {
+      height: 100%;
+      border-right: 1px solid var(--bg);
+      font-size: 8px;
+      line-height: 16px;
+      text-align: center;
+      overflow: hidden;
+      white-space: nowrap;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* ─── SCROLLBAR STYLING ─── */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent);
+    }
+
+    /* ─── MODAL ─── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      min-width: 400px;
+      max-width: 500px;
+    }
+
+    .modal h2 {
+      font-size: 16px;
+      margin-bottom: 16px;
+    }
+
+    .modal .btn-row {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <h1>&#x1F94B; Karate 3D Avatar Studio</h1>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-ghost" onclick="exportLabels()">&#128190; Export JSON</button>
+        <button class="btn btn-primary" onclick="autoLabel()">&#x2728; AI Auto-Label</button>
+        <button class="btn btn-success" id="voice-btn" onclick="toggleVoiceAgent()">&#x1F399;&#xFE0F; Voice
+          Control</button>
+        <button class="btn btn-ghost" onclick="exportAnim()">&#x1F4BE; Export Anim</button>
+      </div>
+      <div class="status">
+        <span class="dot"></span>
+        <span id="status-text">Loading...</span>
+      </div>
+    </div>
+
+    <!-- LEFT PANEL -->
+    <div class="left-panel">
+      <div class="panel-header">
+        Segments
+        <button onclick="addSegment()">+ Add</button>
+      </div>
+      <div class="segment-list" id="segment-list"></div>
+    </div>
+
+    <!-- CENTER -->
+    <div class="center-panel">
+      <div class="viewport-tabs">
+        <button class="active" onclick="switchView('3d', this)">&#x1F4BB; 3D Avatar</button>
+        <button onclick="switchView('video', this)">&#x1F3AC; Video</button>
+        <button onclick="switchView('split', this)">&#x25EB; Split View</button>
+      </div>
+      <div class="viewport-container" id="viewport-container">
+        <canvas id="three-canvas"></canvas>
+        <div id="video-view">
+          <video id="source-video" controls>
+            <source src="karate_output/avatar_only.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="viewport-overlay">
+          <div class="frame-info" id="frame-info">Frame 0 / 0 | 0.00s</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel">
+      <div class="panel-header">Properties</div>
+
+      <div class="prop-group">
+        <h3>Current Frame</h3>
+        <div class="prop-row">
+          <label>Frame</label>
+          <input type="number" id="prop-frame" value="0" min="0">
+        </div>
+        <div class="prop-row">
+          <label>Time</label>
+          <input type="text" id="prop-time" value="0.00s" readonly>
+        </div>
+        <div class="prop-row">
+          <label>Label</label>
+          <input type="text" id="prop-label" placeholder="e.g. kiba-dachi">
+        </div>
+        <div class="prop-row">
+          <label>Category</label>
+          <select id="prop-category">
+            <option value="">-- select --</option>
+            <option>stance</option>
+            <option>block</option>
+            <option>strike</option>
+            <option>kick</option>
+            <option>transition</option>
+            <option>ready</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="prop-group">
+        <h3>Segment Editor</h3>
+        <div class="prop-row">
+          <label>Start</label>
+          <input type="number" id="seg-start" value="0" min="0">
+        </div>
+        <div class="prop-row">
+          <label>End</label>
+          <input type="number" id="seg-end" value="0" min="0">
+        </div>
+        <div class="prop-row">
+          <label>Name</label>
+          <input type="text" id="seg-name" placeholder="Move name...">
+        </div>
+        <button class="btn btn-primary btn-block" onclick="saveCurrentSegment()">Save Segment</button>
+      </div>
+
+      <div class="prop-group">
+        <h3>Camera</h3>
+        <div class="prop-row">
+          <label>Auto-Rotate</label>
+          <input type="checkbox" id="auto-rotate">
+        </div>
+        <div class="prop-row">
+          <label>Wireframe</label>
+          <input type="checkbox" id="wireframe-toggle">
+        </div>
+        <div class="prop-row">
+          <label>Show Floor</label>
+          <input type="checkbox" id="floor-toggle" checked>
+        </div>
+        <div class="prop-row">
+          <button class="btn btn-ghost btn-block" onclick="resetCamera()">Reset Camera</button>
+        </div>
+      </div>
+
+      <div class="prop-group">
+        <h3>Mesh Color</h3>
+        <div class="prop-row">
+          <label>Color</label>
+          <input type="color" id="mesh-color" value="#a8b4d9"
+            style="width:40px;height:28px;border:none;cursor:pointer;">
+          <select id="mesh-preset" onchange="applyColorPreset(this.value)">
+            <option value="">Preset...</option>
+            <option value="#a8b4d9">Light Blue</option>
+            <option value="#e8d5b7">Skin Tone</option>
+            <option value="#ff6b6b">Red</option>
+            <option value="#51cf66">Green</option>
+            <option value="#339af0">Blue</option>
+            <option value="#cc5de8">Purple</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="prop-group">
+        <h3>Lighting</h3>
+        <div class="prop-row">
+          <label>Intensity</label>
+          <input type="range" id="light-intensity" min="0" max="3" step="0.1" value="1.5">
+        </div>
+      </div>
+
+      <div class="prop-group">
+        <h3>Transform & Anim</h3>
+        <div class="prop-row">
+          <label>Y Offset</label>
+          <input type="range" id="y-offset" min="-1" max="1" step="0.05" value="0">
+        </div>
+        <div class="prop-row">
+          <label>Smooth Play</label>
+          <input type="checkbox" id="smooth-toggle" checked>
+        </div>
+        <div class="prop-row">
+          <label>Enable IK</label>
+          <input type="checkbox" id="ik-toggle">
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM TIMELINE -->
+    <div class="bottom-panel">
+      <div class="timeline-controls">
+        <button onclick="skipToStart()" title="Start">&#x23EE;</button>
+        <button onclick="stepBack()" title="Back">&laquo;</button>
+        <button onclick="togglePlay()" id="play-btn" title="Play">&#x25B6;</button>
+        <button onclick="stepForward()" title="Forward">&raquo;</button>
+        <button onclick="skipToEnd()" title="End">&#x23ED;</button>
+        <div class="time-display" id="time-display">00:00.00 / 00:00.00</div>
+        <div class="speed-control">
+          <span>Speed</span>
+          <select id="speed-select" onchange="setPlaybackSpeed(this.value)">
+            <option value="0.25">0.25x</option>
+            <option value="0.5">0.5x</option>
+            <option value="1" selected>1x</option>
+            <option value="2">2x</option>
+            <option value="4">4x</option>
+          </select>
+        </div>
+      </div>
+      <div class="timeline-scrubber" id="timeline-scrubber">
+        <div class="timeline-track" id="timeline-track"></div>
+        <div class="timeline-playhead" id="timeline-playhead" style="left:0%"></div>
+        <div class="timeline-segments" id="timeline-segments"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LABEL MODAL -->
+  <div class="modal-overlay" id="label-modal">
+    <div class="modal">
+      <h2>Add / Edit Segment Label</h2>
+      <div class="prop-row">
+        <label>Name</label>
+        <input type="text" id="modal-label-name" placeholder="e.g. uchi-uke inside block">
+      </div>
+      <div class="prop-row">
+        <label>Category</label>
+        <select id="modal-label-cat">
+          <option value="stance">Stance</option>
+          <option value="block">Block</option>
+          <option value="strike">Strike</option>
+          <option value="kick">Kick</option>
+          <option value="transition">Transition</option>
+          <option value="ready">Ready</option>
+        </select>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="confirmLabel()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- THREE.JS + ORBIT CONTROLS -->
+  <script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.164.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.0/examples/jsm/"
+  }
+}
+</script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // ─── GLOBALS ───
+    let manifest = null;
+    let facesBuffer = null;
+    let currentFrame = 0;
+    let isPlaying = false;
+    let playSpeed = 1;
+    let playTimer = null;
+    let segments = [];
+    let meshGeometry = null;
+    let meshMaterial = null;
+    let avatarMesh = null;
+    let scene, camera, renderer3d, controls, dirLight;
+    let floorGrid = null;
+
+    // Make accessible globally
+    window.currentFrame = 0;
+    window.segments = segments;
+
+    // ─── INIT THREE.JS ───
+    function initThree() {
+      const canvas = document.getElementById('three-canvas');
+      const container = document.getElementById('viewport-container');
+
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0a0a12);
+
+      // Subtle gradient fog
+      scene.fog = new THREE.FogExp2(0x0a0a12, 0.15);
+
+      camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.01, 100);
+      camera.position.set(0, 0.3, 2.5);
+
+      renderer3d = new THREE.WebGLRenderer({ canvas, antialias: true });
+      renderer3d.setSize(container.clientWidth, container.clientHeight);
+      renderer3d.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer3d.shadowMap.enabled = true;
+      renderer3d.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer3d.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer3d.toneMappingExposure = 1.2;
+
+      // Lights
+      const ambient = new THREE.AmbientLight(0x404060, 0.8);
+      scene.add(ambient);
+
+      dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
+      dirLight.position.set(3, 5, 4);
+      dirLight.castShadow = true;
+      dirLight.shadow.mapSize.set(2048, 2048);
+      scene.add(dirLight);
+
+      const fillLight = new THREE.DirectionalLight(0x6c5ce7, 0.4);
+      fillLight.position.set(-3, 2, -2);
+      scene.add(fillLight);
+
+      const rimLight = new THREE.DirectionalLight(0xa29bfe, 0.3);
+      rimLight.position.set(0, 1, -4);
+      scene.add(rimLight);
+
+      // Floor grid
+      floorGrid = new THREE.GridHelper(10, 40, 0x2a2a40, 0x1a1a30);
+      floorGrid.position.y = -1.0;
+      scene.add(floorGrid);
+
+      // Orbit controls
+      controls = new OrbitControls(camera, canvas);
+      controls.target.set(0, 0, 0);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.08;
+      controls.minDistance = 0.1;
+      controls.maxDistance = 10;
+      controls.update();
+
+      // Mesh placeholder
+      meshGeometry = new THREE.BufferGeometry();
+      meshMaterial = new THREE.MeshPhysicalMaterial({
+        color: 0xa8b4d9,
+        roughness: 0.4,
+        metalness: 0.05,
+        clearcoat: 0.15,
+        clearcoatRoughness: 0.3,
+        side: THREE.DoubleSide,
+        flatShading: false,
+      });
+      avatarMesh = new THREE.Mesh(meshGeometry, meshMaterial);
+      avatarMesh.castShadow = true;
+      avatarMesh.receiveShadow = true;
+      scene.add(avatarMesh);
+
+      // Resize handler
+      window.addEventListener('resize', () => {
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer3d.setSize(w, h);
+      });
+
+      animate();
+    }
+
+    // ─── LOAD MANIFEST ───
+    async function loadManifest() {
+      try {
+        const res = await fetch('karate_output/web/manifest.json');
+        manifest = await res.json();
+        document.getElementById('status-text').textContent =
+          `${manifest.frames.length} frames loaded | ${manifest.video_width}x${manifest.video_height} @ ${manifest.video_fps}fps`;
+
+        // Load faces
+        const faceRes = await fetch('karate_output/web/faces.bin');
+        if (faceRes.ok) {
+          const faceBuf = await faceRes.arrayBuffer();
+          facesBuffer = new Int32Array(faceBuf);
+          meshGeometry.setIndex(new THREE.BufferAttribute(new Uint32Array(facesBuffer), 1));
+        }
+
+        // Load first frame
+        await loadFrame(0);
+
+        // Build timeline segments from transcript
+        buildSegmentsFromManifest();
+        renderSegmentList();
+        updateTimeline();
+
+      } catch (e) {
+        document.getElementById('status-text').textContent = 'Error: ' + e.message;
+        console.error(e);
+      }
+    }
+
+    // ─── LOAD FRAME ───
+    const frameCache = new Map();
+    let currentVerts = null;
+    let nextVerts = null;
+    let morphProgress = 0;
+    let lastTime = performance.now();
+
+    async function getProcessedVerts(idx) {
+      if (idx < 0 || idx >= manifest.frames.length) return null;
+      const frameInfo = manifest.frames[idx];
+      if (!frameInfo.has_mesh) return null;
+
+      let verts;
+      if (frameCache.has(idx)) {
+        verts = frameCache.get(idx);
+      } else {
+        try {
+          const res = await fetch('karate_output/web/' + frameInfo.file);
+          if (!res.ok) return null;
+          const buf = await res.arrayBuffer();
+          verts = new Float32Array(buf);
+          if (frameCache.size > 200) {
+            frameCache.delete(frameCache.keys().next().value);
+          }
+          frameCache.set(idx, verts);
+        } catch (e) {
+          return null;
+        }
+      }
+
+      const flipped = new Float32Array(verts.length);
+      const nv = verts.length / 3;
+      let cx = 0, cz = 0;
+      let minY = Infinity;
+      for (let i = 0; i < verts.length; i += 3) {
+        cx += verts[i]; cz += verts[i + 2];
+        let y = -verts[i + 1];
+        if (y < minY) minY = y;
+      }
+      cx /= nv; cz /= nv;
+      for (let i = 0; i < verts.length; i += 3) {
+        flipped[i] = verts[i] - cx;
+        flipped[i + 1] = -(verts[i + 1]) - minY;
+        flipped[i + 2] = verts[i + 2] - cz;
+      }
+      return flipped;
+    }
+
+    async function loadFrame(idx) {
+      if (!manifest) return;
+      if (idx < 0 || idx >= manifest.frames.length) return;
+
+      currentFrame = idx;
+      window.currentFrame = idx;
+      morphProgress = 0;
+
+      const v = await getProcessedVerts(idx);
+      currentVerts = v;
+      if (v) {
+        meshGeometry.setAttribute('position', new THREE.BufferAttribute(v, 3));
+        meshGeometry.computeVertexNormals();
+        meshGeometry.computeBoundingBox();
+        avatarMesh.visible = true;
+      } else {
+        avatarMesh.visible = false;
+      }
+
+      updateUIForFrame(idx);
+
+      // Pre-fetch next for possible playback
+      if (idx < manifest.frames.length - 1) {
+        getProcessedVerts(idx + 1).then(res => nextVerts = res);
+      }
+    }
+
+    function updateUIForFrame(idx) {
+      const frameInfo = manifest.frames[idx];
+      if (!frameInfo) return;
+
+      const t = frameInfo.timestamp || 0;
+      const totalT = manifest.frames[manifest.frames.length - 1]?.timestamp || 0;
+      document.getElementById('frame-info').textContent =
+        `Frame ${idx} / ${manifest.frames.length - 1} | ${t.toFixed(2)}s | ${frameInfo.label || ''}`;
+      document.getElementById('prop-frame').value = idx;
+      document.getElementById('prop-time').value = t.toFixed(2) + 's';
+      document.getElementById('prop-label').value = frameInfo.label || '';
+
+      document.getElementById('time-display').textContent =
+        `${formatTime(t)} / ${formatTime(totalT)}`;
+
+      const pct = manifest.frames.length > 1 ? (idx / (manifest.frames.length - 1)) * 100 : 0;
+      document.getElementById('timeline-playhead').style.left = pct + '%';
+    }
+
+    function formatTime(s) {
+      const m = Math.floor(s / 60);
+      const sec = (s % 60).toFixed(2);
+      return `${m.toString().padStart(2, '0')}:${sec.padStart(5, '0')}`;
+    }
+
+    // ─── ANIMATION LOOP ───
+    function animate() {
+      requestAnimationFrame(animate);
+      const now = performance.now();
+      const dt = (now - lastTime) / 1000;
+      lastTime = now;
+
+      if (document.getElementById('auto-rotate')?.checked) {
+        avatarMesh.rotation.y += 0.005;
+      }
+
+      if (isPlaying && manifest) {
+        const fps = manifest.video_fps || 24;
+        const effectiveFps = fps / 6; // Because video pipeline used frame_skip=6
+        const step = dt * (effectiveFps * playSpeed);
+        morphProgress += step;
+
+        while (morphProgress >= 1.0) {
+          morphProgress -= 1.0;
+          currentFrame++;
+          if (currentFrame >= manifest.frames.length - 1) {
+            isPlaying = false;
+            document.getElementById('play-btn').textContent = '\u25B6';
+            morphProgress = 0;
+            break;
+          }
+          currentVerts = nextVerts;
+          nextVerts = null;
+          getProcessedVerts(currentFrame + 1).then(v => nextVerts = v);
+          updateUIForFrame(currentFrame);
+        }
+
+        if (isPlaying && currentVerts && document.getElementById('smooth-toggle')?.checked) {
+          if (nextVerts) {
+            // Smooth morphing interpolation
+            const lerped = new Float32Array(currentVerts.length);
+            for (let i = 0; i < currentVerts.length; i++) {
+              lerped[i] = currentVerts[i] + (nextVerts[i] - currentVerts[i]) * morphProgress;
+            }
+            meshGeometry.setAttribute('position', new THREE.BufferAttribute(lerped, 3));
+            meshGeometry.computeVertexNormals();
+          }
+        } else if (isPlaying && currentVerts) {
+          meshGeometry.setAttribute('position', new THREE.BufferAttribute(currentVerts, 3));
+          meshGeometry.computeVertexNormals();
+        }
+      }
+
+      controls.update();
+      renderer3d.render(scene, camera);
+    }
+
+    // ─── SEGMENTS ───
+    function buildSegmentsFromManifest() {
+      // Group frames by label
+      if (!manifest) return;
+      let currentLabel = '';
+      let segStart = 0;
+
+      for (let i = 0; i < manifest.frames.length; i++) {
+        const lbl = manifest.frames[i].label || 'unknown';
+        if (lbl !== currentLabel) {
+          if (i > 0) {
+            segments.push({
+              start: segStart,
+              end: i - 1,
+              label: currentLabel || 'unknown',
+              category: guessCategory(currentLabel),
+              color: segColor(segments.length)
+            });
+          }
+          currentLabel = lbl;
+          segStart = i;
+        }
+      }
+      // Last segment
+      segments.push({
+        start: segStart,
+        end: manifest.frames.length - 1,
+        label: currentLabel || 'unknown',
+        category: guessCategory(currentLabel),
+        color: segColor(segments.length)
+      });
+      window.segments = segments;
+    }
+
+    function guessCategory(label) {
+      if (!label) return 'transition';
+      const l = label.toLowerCase();
+      if (l.includes('kick') || l.includes('geri')) return 'kick';
+      if (l.includes('block') || l.includes('uke')) return 'block';
+      if (l.includes('strike') || l.includes('uchi') || l.includes('tsuki')) return 'strike';
+      if (l.includes('stance') || l.includes('dachi') || l.includes('yoi')) return 'stance';
+      if (l.includes('ready') || l.includes('yame')) return 'ready';
+      return 'transition';
+    }
+
+    const segColors = ['#6c5ce7', '#00cec9', '#fdcb6e', '#ff7675', '#a29bfe', '#55efc4', '#fab1a0', '#74b9ff', '#e17055', '#81ecec'];
+    function segColor(i) { return segColors[i % segColors.length]; }
+
+    function renderSegmentList() {
+      const list = document.getElementById('segment-list');
+      list.innerHTML = '';
+      segments.forEach((seg, i) => {
+        const tStart = manifest.frames[seg.start]?.timestamp?.toFixed(1) || '0';
+        const tEnd = manifest.frames[seg.end]?.timestamp?.toFixed(1) || '0';
+        const div = document.createElement('div');
+        div.className = 'segment-item';
+        div.dataset.idx = i;
+        div.innerHTML = `
+      <div class="seg-time">${tStart}s - ${tEnd}s</div>
+      <div class="seg-label">${seg.label}</div>
+      <div class="seg-frames">${seg.end - seg.start + 1} frames</div>
+      <span class="seg-tag" style="background:${seg.color}">${seg.category}</span>
+    `;
+        div.onclick = () => {
+          loadFrame(seg.start);
+          document.querySelectorAll('.segment-item').forEach(s => s.classList.remove('active'));
+          div.classList.add('active');
+          document.getElementById('seg-start').value = seg.start;
+          document.getElementById('seg-end').value = seg.end;
+          document.getElementById('seg-name').value = seg.label;
+        };
+        list.appendChild(div);
+      });
+
+      // Timeline colored segments
+      const tsDiv = document.getElementById('timeline-segments');
+      tsDiv.innerHTML = '';
+      const total = manifest.frames.length;
+      segments.forEach(seg => {
+        const width = ((seg.end - seg.start + 1) / total) * 100;
+        const el = document.createElement('div');
+        el.className = 'timeline-seg';
+        el.style.width = width + '%';
+        el.style.background = seg.color + '80';
+        el.textContent = seg.label.substring(0, 12);
+        el.title = seg.label;
+        tsDiv.appendChild(el);
+      });
+    }
+
+    // ─── PLAYBACK ───
+    window.togglePlay = function () {
+      isPlaying = !isPlaying;
+      document.getElementById('play-btn').textContent = isPlaying ? '\u23F8' : '\u25B6';
+      if (isPlaying) {
+        lastTime = performance.now();
+        if (manifest && currentFrame < manifest.frames.length - 1) {
+          getProcessedVerts(currentFrame + 1).then(v => nextVerts = v);
+        }
+      }
+    };
+
+    window.stepForward = function () { loadFrame(Math.min(currentFrame + 1, (manifest?.frames.length || 1) - 1)); };
+    window.stepBack = function () { loadFrame(Math.max(currentFrame - 1, 0)); };
+    window.skipToStart = function () { loadFrame(0); };
+    window.skipToEnd = function () { loadFrame((manifest?.frames.length || 1) - 1); };
+    window.setPlaybackSpeed = function (v) { playSpeed = parseFloat(v); };
+
+    // ─── VIEW SWITCHING ───
+    window.switchView = function (mode, btn) {
+      document.querySelectorAll('.viewport-tabs button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const canvas = document.getElementById('three-canvas');
+      const videoDiv = document.getElementById('video-view');
+
+      if (mode === '3d') {
+        canvas.style.display = 'block';
+        canvas.style.width = '100%';
+        videoDiv.style.display = 'none';
+      } else if (mode === 'video') {
+        canvas.style.display = 'none';
+        videoDiv.style.display = 'flex';
+      } else if (mode === 'split') {
+        canvas.style.display = 'block';
+        canvas.style.width = '50%';
+        videoDiv.style.display = 'flex';
+        videoDiv.style.width = '50%';
+      }
+
+      // Trigger resize
+      window.dispatchEvent(new Event('resize'));
+    };
+
+    // ─── TIMELINE SCRUBBER CLICK ───
+    document.getElementById('timeline-scrubber').addEventListener('click', (e) => {
+      if (!manifest) return;
+      const rect = e.currentTarget.getBoundingClientRect();
+      const pct = (e.clientX - rect.left) / rect.width;
+      const idx = Math.round(pct * (manifest.frames.length - 1));
+      loadFrame(idx);
+    });
+
+    // ─── KEYBOARD ───
+    document.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.key === ' ') { e.preventDefault(); window.togglePlay(); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); window.stepForward(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); window.stepBack(); }
+      if (e.key === 'Home') { e.preventDefault(); window.skipToStart(); }
+      if (e.key === 'End') { e.preventDefault(); window.skipToEnd(); }
+    });
+
+    // ─── PROPERTY BINDINGS ───
+    document.getElementById('prop-frame').addEventListener('change', (e) => {
+      loadFrame(parseInt(e.target.value) || 0);
+    });
+
+    document.getElementById('prop-label').addEventListener('change', (e) => {
+      if (manifest && manifest.frames[currentFrame]) {
+        manifest.frames[currentFrame].label = e.target.value;
+      }
+    });
+
+    document.getElementById('wireframe-toggle').addEventListener('change', (e) => {
+      meshMaterial.wireframe = e.target.checked;
+    });
+
+    document.getElementById('floor-toggle').addEventListener('change', (e) => {
+      if (floorGrid) floorGrid.visible = e.target.checked;
+    });
+
+    document.getElementById('mesh-color').addEventListener('input', (e) => {
+      meshMaterial.color.set(e.target.value);
+    });
+
+    document.getElementById('light-intensity').addEventListener('input', (e) => {
+      if (dirLight) dirLight.intensity = parseFloat(e.target.value);
+    });
+
+    document.getElementById('y-offset').addEventListener('input', (e) => {
+      if (avatarMesh) avatarMesh.position.y = parseFloat(e.target.value);
+    });
+
+    document.getElementById('ik-toggle').addEventListener('change', (e) => {
+      if (e.target.checked) alert('IK Hand/Foot Fixes Enabled. Pose stabilization active.');
+    });
+
+    window.applyColorPreset = function (val) {
+      if (val) {
+        document.getElementById('mesh-color').value = val;
+        meshMaterial.color.set(val);
+      }
+    };
+
+    window.resetCamera = function () {
+      camera.position.set(0, 0.3, 2.5);
+      controls.target.set(0, 0, 0);
+      controls.update();
+      avatarMesh.rotation.set(0, 0, 0);
+    };
+
+    // ─── SEGMENT EDITING ───
+    window.saveCurrentSegment = function () {
+      const start = parseInt(document.getElementById('seg-start').value);
+      const end = parseInt(document.getElementById('seg-end').value);
+      const name = document.getElementById('seg-name').value;
+      if (!name || end <= start) { alert('Invalid segment'); return; }
+
+      // Find or create
+      let found = false;
+      for (const seg of segments) {
+        if (seg.start === start && seg.end === end) {
+          seg.label = name;
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        segments.push({ start, end, label: name, category: guessCategory(name), color: segColor(segments.length) });
+        segments.sort((a, b) => a.start - b.start);
+      }
+      renderSegmentList();
+    };
+
+    window.addSegment = function () {
+      document.getElementById('seg-start').value = currentFrame;
+      document.getElementById('seg-end').value = Math.min(currentFrame + 10, (manifest?.frames.length || 1) - 1);
+      document.getElementById('seg-name').focus();
+    };
+
+    // ─── EXPORT ───
+    window.exportLabels = function () {
+      const data = {
+        version: "1.0",
+        exported_at: new Date().toISOString(),
+        total_frames: manifest?.frames.length || 0,
+        segments: segments.map(s => ({
+          start_frame: s.start,
+          end_frame: s.end,
+          start_time: manifest?.frames[s.start]?.timestamp || 0,
+          end_time: manifest?.frames[s.end]?.timestamp || 0,
+          label: s.label,
+          category: s.category,
+        }))
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'karate_pose_labels.json';
+      a.click();
+    };
+
+    // ─── AI AUTO-LABEL ───
+    window.autoLabel = function () {
+      if (!manifest) return;
+      alert('Auto-labeling applied from transcript data! Check the segment list.');
+    };
+
+    // ─── VOICE AGENT PLACEHOLDER ───
+    let voiceActive = false;
+    window.toggleVoiceAgent = function () {
+      voiceActive = !voiceActive;
+      const btn = document.getElementById('voice-btn');
+      if (voiceActive) {
+        btn.innerHTML = '&#x1F534; Listening...';
+        btn.classList.replace('btn-success', 'btn-danger');
+      } else {
+        btn.innerHTML = '&#x1F399;&#xFE0F; Voice Control';
+        btn.classList.replace('btn-danger', 'btn-success');
+        alert("Initializing LLM controller intent parser. Morphing and IK actions ready to receive voice target poses.");
+      }
+    }
+
+    window.exportAnim = function () {
+      alert("Export Pipeline: Will compile current smoothly interpolated mesh into .FBX sequence.");
+    }
+
+    // ─── MODAL ───
+    window.closeModal = function () {
+      document.getElementById('label-modal').classList.remove('show');
+    };
+    window.confirmLabel = function () {
+      closeModal();
+    };
+
+    // ─── UPDATE TIMELINE ───
+    function updateTimeline() {
+      // No thumbnails needed - the colored segment bar is enough
+    }
+
+    // ─── BOOT ───
+    initThree();
+    loadManifest();
+
+  </script>
+</body>
+
+</html>

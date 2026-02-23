@@ -1,0 +1,140 @@
+[
+    {
+        "start": 0.0,
+        "end": 78.0,
+        "text": "[Music intro / performance section]",
+        "pose_label": null,
+        "category": "music",
+        "frame_start": 0,
+        "frame_end": 2340
+    },
+    {
+        "start": 78.0,
+        "end": 95.0,
+        "text": "hey guys my name is sensei jason liang im a fourth dan in shotokan karate, in today's video we are learning kata heian sandan",
+        "pose_label": "yoi (ready stance)",
+        "category": "intro",
+        "frame_start": 2340,
+        "frame_end": 2850
+    },
+    {
+        "start": 95.0,
+        "end": 102.0,
+        "text": "so if you guys are ready lets get right into it okay from your position first move youre gonna step into",
+        "pose_label": "yoi (ready stance)",
+        "category": "instruction",
+        "frame_start": 2850,
+        "frame_end": 3060
+    },
+    {
+        "start": 100.0,
+        "end": 112.0,
+        "text": "make sure your hiki day is pulled far back, stepping up, cross block, straight like it stands, hand position boom",
+        "pose_label": "morote uke (augmented block) from gedan barai",
+        "category": "technique",
+        "karate_terms": [
+            "hiki-te",
+            "cross-block",
+            "morote-uke"
+        ],
+        "frame_start": 3000,
+        "frame_end": 3360
+    },
+    {
+        "start": 130.0,
+        "end": 162.0,
+        "text": "so this one here is kibadachi or horse stance like so make sure in kibadachi your feet are not pointing out because this is entirely a different stance, toes in, knees out, okay tailbone tucked",
+        "pose_label": "kiba-dachi (horse riding stance)",
+        "category": "technique",
+        "karate_terms": [
+            "kiba-dachi",
+            "horse-stance"
+        ],
+        "frame_start": 3900,
+        "frame_end": 4860
+    },
+    {
+        "start": 162.0,
+        "end": 175.0,
+        "text": "stepping forward open into oizuki",
+        "pose_label": "oizuki (lunge punch) to jodan",
+        "category": "technique",
+        "karate_terms": [
+            "oizuki",
+            "jodan-punch"
+        ],
+        "frame_start": 4860,
+        "frame_end": 5250
+    },
+    {
+        "start": 153.0,
+        "end": 200.0,
+        "text": "from this position were gonna go right leg crescent kick so kind of loops around youre blocking a punch or a strike, boom, elbow lock, back hand back to the waist",
+        "pose_label": "mikazuki-geri (crescent kick) to empi-uke (elbow block)",
+        "category": "technique",
+        "karate_terms": [
+            "mikazuki-geri",
+            "crescent-kick",
+            "empi-uke",
+            "elbow-strike",
+            "hiki-te"
+        ],
+        "frame_start": 4590,
+        "frame_end": 6000
+    },
+    {
+        "start": 181.0,
+        "end": 210.0,
+        "text": "same thing on the other side crescent kick length",
+        "pose_label": "mikazuki-geri left side",
+        "category": "technique",
+        "karate_terms": [
+            "mikazuki-geri",
+            "crescent-kick"
+        ],
+        "frame_start": 5430,
+        "frame_end": 6300
+    },
+    {
+        "start": 192.0,
+        "end": 230.0,
+        "text": "i wind up boom, step, my rear leg kind of does a semi-circular motion, okay right about here, same time i twist",
+        "pose_label": "tsukami-yose (grabbing pull) with kiai and gyaku-zuki",
+        "category": "technique",
+        "karate_terms": [
+            "tsukami-yose",
+            "kiai",
+            "semi-circular",
+            "pivot",
+            "gyaku-zuki"
+        ],
+        "frame_start": 5760,
+        "frame_end": 6900
+    },
+    {
+        "start": 229.0,
+        "end": 237.0,
+        "text": "yame (stop)",
+        "pose_label": "yame - return to yoi",
+        "category": "command",
+        "karate_terms": [
+            "yame"
+        ],
+        "frame_start": 6870,
+        "frame_end": 7110
+    },
+    {
+        "start": 229.0,
+        "end": 295.0,
+        "text": "so now that you guys have a better understanding of yukata im going to count it out for you guys step by step so here we go starting off in yoyo and now",
+        "pose_label": "full kata sequence - counted demonstration",
+        "category": "full_kata_demo",
+        "karate_terms": [
+            "yoi",
+            "kata",
+            "heian-sandan"
+        ],
+        "frame_start": 6870,
+        "frame_end": 8850
+    }
+]

@@ -1,0 +1,165 @@
+{
+  "unknown": {
+    "n_frames": 311,
+    "category": "music",
+    "karate_terms": [],
+    "frame_indices": [
+      6,
+      12,
+      18,
+      24,
+      30
+    ]
+  },
+  "yoi (ready stance)": {
+    "n_frames": 87,
+    "category": "intro",
+    "karate_terms": [],
+    "frame_indices": [
+      1872,
+      1878,
+      1884,
+      1890,
+      1896
+    ]
+  },
+  "morote uke (augmented block) from gedan barai": {
+    "n_frames": 49,
+    "category": "technique",
+    "karate_terms": [
+      "hiki-te",
+      "cross-block",
+      "morote-uke"
+    ],
+    "frame_indices": [
+      2400,
+      2406,
+      2412,
+      2418,
+      2424
+    ]
+  },
+  "transition": {
+    "n_frames": 71,
+    "category": "unknown",
+    "karate_terms": [],
+    "frame_indices": [
+      2694,
+      2700,
+      2706,
+      2712,
+      2718
+    ]
+  },
+  "kiba-dachi (horse riding stance)": {
+    "n_frames": 92,
+    "category": "technique",
+    "karate_terms": [
+      "kiba-dachi",
+      "horse-stance"
+    ],
+    "frame_indices": [
+      3120,
+      3126,
+      3132,
+      3138,
+      3144
+    ]
+  },
+  "mikazuki-geri (crescent kick) to empi-uke (elbow block)": {
+    "n_frames": 59,
+    "category": "technique",
+    "karate_terms": [
+      "mikazuki-geri",
+      "crescent-kick",
+      "empi-uke",
+      "elbow-strike",
+      "hiki-te"
+    ],
+    "frame_indices": [
+      3672,
+      3678,
+      3684,
+      3690,
+      3696
+    ]
+  },
+  "oizuki (lunge punch) to jodan": {
+    "n_frames": 53,
+    "category": "technique",
+    "karate_terms": [
+      "oizuki",
+      "jodan-punch"
+    ],
+    "frame_indices": [
+      3888,
+      3894,
+      3900,
+      3906,
+      3912
+    ]
+  },
+  "mikazuki-geri left side": {
+    "n_frames": 44,
+    "category": "technique",
+    "karate_terms": [
+      "mikazuki-geri",
+      "crescent-kick"
+    ],
+    "frame_indices": [
+      4344,
+      4350,
+      4356,
+      4362,
+      4368
+    ]
+  },
+  "tsukami-yose (grabbing pull) with kiai and gyaku-zuki": {
+    "n_frames": 148,
+    "category": "technique",
+    "karate_terms": [
+      "tsukami-yose",
+      "kiai",
+      "semi-circular",
+      "pivot",
+      "gyaku-zuki"
+    ],
+    "frame_indices": [
+      4608,
+      4614,
+      4620,
+      4626,
+      4632
+    ]
+  },
+  "yame - return to yoi": {
+    "n_frames": 33,
+    "category": "command",
+    "karate_terms": [
+      "yame"
+    ],
+    "frame_indices": [
+      5496,
+      5502,
+      5508,
+      5514,
+      5520
+    ]
+  },
+  "full kata sequence - counted demonstration": {
+    "n_frames": 166,
+    "category": "full_kata_demo",
+    "karate_terms": [
+      "yoi",
+      "kata",
+      "heian-sandan"
+    ],
+    "frame_indices": [
+      5694,
+      5700,
+      5706,
+      5712,
+      5718
+    ]
+  }
+}
