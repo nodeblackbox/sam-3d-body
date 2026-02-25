@@ -17,16 +17,16 @@ This gives you:
   - 3D joint coordinates indexed by technique — ready for pose commands
 
 Usage:
-    C:\Python311\python.exe karate_pose_pipeline.py
+    python karate_pose_pipeline.py
 
     # Specific frame range:
-    C:\Python311\python.exe karate_pose_pipeline.py --start_frame 0 --end_frame 500
+    python karate_pose_pipeline.py --start_frame 0 --end_frame 500
 
     # Skip every 2nd frame (2x faster):
-    C:\Python311\python.exe karate_pose_pipeline.py --frame_skip 2
+    python karate_pose_pipeline.py --frame_skip 2
 
     # Body-only mode (no hand decoder):
-    C:\Python311\python.exe karate_pose_pipeline.py --inference_type body
+    python karate_pose_pipeline.py --inference_type body
 """
 
 import os, sys, json, time, csv, argparse

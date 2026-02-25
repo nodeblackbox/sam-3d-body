@@ -85,11 +85,14 @@ dmypy.json
 # IDE
 .vscode/
 .claude/
+.qodo/
+.windsurf/
 
 # Project-specific: Model weights and checkpoints
 *.pt
 *.pth
 *.ckpt
+*.pkl
 /checkpoints/
 
 # Project-specific: Data files
@@ -98,6 +101,10 @@ dmypy.json
 
 # Project-specific: Media files
 *.mp4
+*.avi
+*.mov
+*.webm
+*.gif
 
 # Project-specific: Archives
 *.tar
@@ -105,11 +112,21 @@ dmypy.json
 
 # Project-specific: Logs and outputs
 *.log
+*.txt
+!README*.txt
 logs/
 lightning_logs/
 results/
 sandbox/
 debug/
+
+# Project-specific: Pipeline outputs
+/karate_output/
+/karate_frames/
+/output_video/
+/output_dancing/
+/input_video/
+/test_output/
 
 # Project-specific: Local tools
 .sl/
@@ -119,3 +136,9 @@ debug/
 **/.dist_test
 sandbox*
 *.sh
+
+# YouTube cookies (sensitive)
+cookies.txt
+
+# Third-party model repos
+/third_party/

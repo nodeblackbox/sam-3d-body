@@ -23,7 +23,7 @@ pip install huggingface_hub --upgrade
 Write-Host "`n[4/5] Installing tqdm / opencv extras..." -ForegroundColor Yellow
 pip install tqdm opencv-python imageio imageio-ffmpeg
 
-# 5. Install torch if not present (RTX 4090 = CUDA 12.x)
+# 5. Install torch if not present (CUDA 12.x)
 Write-Host "`n[5/5] Checking PyTorch..." -ForegroundColor Yellow
 python -c "import torch; print(f'PyTorch {torch.__version__} - CUDA: {torch.cuda.is_available()}')" 2>&1
 if ($LASTEXITCODE -ne 0) {

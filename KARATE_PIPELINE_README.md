@@ -16,7 +16,6 @@ model to produce full-body 3D human mesh reconstructions, frame by frame.
 4. Save the file as **`cookies.txt`** in this folder (`sam-3d-body/`)
 5. Run:
    ```powershell
-   $env:Path += ";C:\Users\nasan\AppData\Local\Programs\Python\Python311\Scripts"
    python download_karate_video.py
    ```
 
@@ -28,7 +27,6 @@ model to produce full-body 3D human mesh reconstructions, frame by frame.
 ### Option C: Use yt-dlp with your logged-in Edge/Chrome
 ```powershell
 # Close Edge/Chrome first, then run:
-$env:Path += ";C:\Users\nasan\AppData\Local\Programs\Python\Python311\Scripts"
 yt-dlp --cookies-from-browser edge -f "bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]" --merge-output-format mp4 -o "input_video/karate_video.mp4" https://www.youtube.com/watch?v=1MrRmimBJoA
 ```
 
@@ -147,15 +145,15 @@ Output JPEG (4 panels: original | 2D skeleton | 3D mesh front | 3D mesh side)
 
 ---
 
-## GPU Requirements (RTX 4090 — 24GB VRAM)
+## GPU Requirements
 
-| Mode | VRAM | Speed (4090) | Quality |
-|------|------|-------------|---------|
+| Mode | VRAM | Speed (RTX 4090) | Quality |
+|------|------|-------------------|---------|
 | Body-only, DINOv3-H+ | ~14 GB | ~0.8s/frame | Excellent |
 | Full (body+hands), DINOv3-H+ | ~16 GB | ~1.5s/frame | Best |
 | Full + SAM2 mask, DINOv3-H+ | ~20 GB | ~2.5s/frame | Maximum |
 
-Your RTX 4090 has 24GB VRAM — all modes are supported! 🎉
+A GPU with at least **16 GB VRAM** is recommended. Use `--frame_skip 2` or `--inference_type body` to reduce requirements.
 
 ---
 

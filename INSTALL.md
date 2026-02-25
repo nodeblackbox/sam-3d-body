@@ -1,54 +1,93 @@
-# Installation Guide for SAM 3D Body
+# Installation Guide
 
-## Setup Python Environment
+## Prerequisites
 
-### 1. Create and Activate Environment
+- **Python 3.11** (recommended via [conda](https://docs.conda.io/en/latest/miniconda.html) or [pyenv](https://github.com/pyenv/pyenv))
+- **CUDA 12.x** compatible GPU with **16+ GB VRAM** (tested on RTX 4090)
+- **ffmpeg** — required for video compilation (`winget install ffmpeg` on Windows, `brew install ffmpeg` on macOS)
+- **Git** — for cloning dependencies
+
+---
+
+## 1. Create and Activate Environment
 
 ```bash
 conda create -n sam_3d_body python=3.11 -y
 conda activate sam_3d_body
 ```
 
-### 2. Install PyTorch
+## 2. Install PyTorch
 
-Please install PyTorch following the [official instructions](https://pytorch.org/get-started/locally/).
-
-### 3. Install Python Dependencies
+Install PyTorch with CUDA support following the [official instructions](https://pytorch.org/get-started/locally/).
 
 ```bash
-pip install pytorch-lightning pyrender opencv-python yacs scikit-image einops timm dill pandas rich hydra-core hydra-submitit-launcher hydra-colorlog pyrootutils webdataset chump networkx==3.2.1 roma joblib seaborn wandb appdirs appnope ffmpeg cython jsonlines pytest xtcocotools loguru optree fvcore black pycocotools tensorboard huggingface_hub
+# Example for CUDA 12.1:
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 ```
 
-### 4. Install Detectron2
+## 3. Install Python Dependencies
+
+```bash
+pip install pytorch-lightning pyrender opencv-python yacs scikit-image einops timm dill pandas rich \
+    hydra-core hydra-submitit-launcher hydra-colorlog pyrootutils webdataset networkx==3.2.1 roma \
+    joblib seaborn wandb appdirs ffmpeg cython jsonlines pytest loguru optree fvcore black \
+    pycocotools tensorboard huggingface_hub tqdm imageio imageio-ffmpeg yt-dlp
+```
+
+## 4. Install Detectron2
 
 ```bash
 pip install 'git+https://github.com/facebookresearch/detectron2.git@a1ce2f9' --no-build-isolation --no-deps
 ```
 
-### 5. Install MoGe (Optional)
+On Windows, you may need Visual Studio Build Tools. See `build_detectron2.bat` for a helper script.
+
+## 5. Install MoGe (FOV Estimation)
 
 ```bash
 pip install git+https://github.com/microsoft/MoGe.git
 ```
 
-### 6. Install SAM3 (Optional)
+## 6. Install SAM3 (Optional — for SAM3 detector)
+
 ```bash
-# this is a minimal installation of sam3 only to support its inference 
 git clone https://github.com/facebookresearch/sam3.git
 cd sam3
 pip install -e .
 pip install decord psutil
 ```
 
+---
 
 ## Getting Model Checkpoints
 
 We host model checkpoints on Hugging Face. **Available models:**
-- [`facebook/sam-3d-body-dinov3`](https://huggingface.co/facebook/sam-3d-body-dinov3)
-- [`facebook/sam-3d-body-vith`](https://huggingface.co/facebook/sam-3d-body-vith)
+- [`facebook/sam-3d-body-dinov3`](https://huggingface.co/facebook/sam-3d-body-dinov3) — DINOv3-H+ (840M params, best quality)
+- [`facebook/sam-3d-body-vith`](https://huggingface.co/facebook/sam-3d-body-vith) — ViT-H (631M params, slightly faster)
 
+> **Note:** You must **request access** on the HuggingFace repos above before downloading.
 
-⚠️ Please note that you need to **request access** on the SAM 3D Body Hugging Face repos above. Once accepted, you need to be authenticated to download the checkpoints.
+```bash
+# Authenticate
+huggingface-cli login
 
-⚠️ SAM 3D Body is available via HuggingFace globally, **except** in comprehensively sanctioned jurisdictions. Sanctioned jurisdiction will result in requests being **rejected**.
+# Download all models (SAM 3D Body + ViTDet + MoGe2 + SAM2)
+python download_models.py
+
+# Or download only the primary model:
+python download_models.py --skip-sam2 --skip-vitdet --skip-moge
+```
+
+---
+
+## API Keys
+
+Copy the template and fill in your keys:
+
+```bash
+cp .env.example .env
+```
+
+- **GROQ_API_KEY** — Required for voice control in the Avatar Studio ([get one here](https://console.groq.com/))
+- **HF_TOKEN** — Required to download gated model checkpoints ([get one here](https://huggingface.co/settings/tokens))
 

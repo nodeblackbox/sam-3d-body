@@ -4,8 +4,8 @@ Uses FULL IMAGE as bounding box (no ViTDet needed initially)
 Then falls back to ViTDet if available.
 
 Usage:
-    C:\Python311\python.exe run_dancing.py
-    C:\Python311\python.exe run_dancing.py --use_detector   # uses ViTDet
+    python run_dancing.py
+    python run_dancing.py --use_detector   # uses ViTDet
 """
 
 import os

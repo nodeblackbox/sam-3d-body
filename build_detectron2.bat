@@ -34,6 +34,6 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 echo [OK] Source cloned. Installing...
-C:\Python311\python.exe -m pip install %SRC_DIR% --no-build-isolation
+python -m pip install %SRC_DIR% --no-build-isolation
 
 echo Done. Exit code: %ERRORLEVEL%

@@ -588,8 +588,8 @@
       <div class="viewport-container" id="viewport-container">
         <canvas id="three-canvas"></canvas>
         <div id="video-view">
-          <video id="source-video" controls>
-            <source src="karate_output/avatar_only.mp4" type="video/mp4">
+          <video id="source-video" controls muted>
+            <source src="karate_heian_sandan.mp4" type="video/mp4">
           </video>
         </div>
         <div class="viewport-overlay">
@@ -999,6 +999,12 @@
 
       const pct = manifest.frames.length > 1 ? (idx / (manifest.frames.length - 1)) * 100 : 0;
       document.getElementById('timeline-playhead').style.left = pct + '%';
+
+      // Sync video exactly with the 3D timestamp
+      const vid = document.getElementById('source-video');
+      if (vid && Math.abs(vid.currentTime - t) > 0.1) {
+        vid.currentTime = t;
+      }
     }
 
     function formatTime(s) {
@@ -1153,6 +1159,12 @@
     window.togglePlay = function () {
       isPlaying = !isPlaying;
       document.getElementById('play-btn').textContent = isPlaying ? '\u23F8' : '\u25B6';
+
+      const vid = document.getElementById('source-video');
+      if (vid) {
+        if (isPlaying) { vid.play(); } else { vid.pause(); }
+      }
+
       if (isPlaying) {
         lastTime = performance.now();
         if (manifest && currentFrame < manifest.frames.length - 1) {
@@ -1318,18 +1330,126 @@
       alert('Auto-labeling applied from transcript data! Check the segment list.');
     };
 
-    // ─── VOICE AGENT PLACEHOLDER ───
+    // ─── VOICE AGENT INTEGRATION ───
     let voiceActive = false;
+    let recognition = null;
+    if ('webkitSpeechRecognition' in window) {
+      recognition = new webkitSpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+
+      recognition.onresult = async function (event) {
+        const transcript = event.results[0][0].transcript;
+        console.log("Heard:", transcript);
+        document.getElementById('status-text').textContent = `Heard: "${transcript}" - Thinking...`;
+        await executeVoiceCommand(transcript);
+
+        // Auto reset button
+        voiceActive = false;
+        const btn = document.getElementById('voice-btn');
+        btn.innerHTML = '&#x1F399;&#xFE0F; Voice Control';
+        btn.classList.replace('btn-danger', 'btn-success');
+      };
+
+      recognition.onerror = function (event) {
+        console.error("Speech Error:", event.error);
+        voiceActive = false;
+        document.getElementById('status-text').textContent = "Voice error: " + event.error;
+        document.getElementById('voice-btn').innerHTML = '&#x1F399;&#xFE0F; Voice Control';
+        document.getElementById('voice-btn').classList.replace('btn-danger', 'btn-success');
+      };
+    }
+
     window.toggleVoiceAgent = function () {
+      if (!recognition) {
+        alert("Speech recognition not supported in this browser. Try Chrome or Edge!");
+        return;
+      }
       voiceActive = !voiceActive;
       const btn = document.getElementById('voice-btn');
       if (voiceActive) {
         btn.innerHTML = '&#x1F534; Listening...';
         btn.classList.replace('btn-success', 'btn-danger');
+        document.getElementById('status-text').textContent = "Listening for command...";
+        recognition.start();
       } else {
         btn.innerHTML = '&#x1F399;&#xFE0F; Voice Control';
         btn.classList.replace('btn-danger', 'btn-success');
-        alert("Initializing LLM controller intent parser. Morphing and IK actions ready to receive voice target poses.");
+        recognition.stop();
+      }
+    }
+
+    async function executeVoiceCommand(text) {
+      const allLabels = segments.map(s => s.label).join(", ");
+      const systemPrompt = `You are an AI 3D Karate Avatar Controller. The user says a command like "show me a block" or "do a kick".
+Available 3D animations in the database: ${allLabels}.
+Extract the user's intent and select the closest matching move label from the database list exactly.
+Reply ONLY with a JSON object in this format:
+{"action": "goto_move", "target_move": "exact label from database"}
+If the command means "play" or "start", reply: {"action": "play"}
+If the command means "stop" or "pause", reply: {"action": "stop"}
+Do not return any extra text.`;
+
+      try {
+        const apiKey = window.GROQ_API_KEY || localStorage.getItem('groq_api_key') || '';
+        if (!apiKey) {
+          const key = prompt('Enter your Groq API key (get one at https://console.groq.com):');
+          if (!key) { document.getElementById('status-text').textContent = 'Voice command cancelled - no API key.'; return; }
+          localStorage.setItem('groq_api_key', key);
+          window.GROQ_API_KEY = key;
+        }
+        const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + (window.GROQ_API_KEY || localStorage.getItem('groq_api_key'))
+          },
+          body: JSON.stringify({
+            model: "llama-3.3-70b-versatile",
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: text }
+            ],
+            temperature: 0.1,
+            response_format: { "type": "json_object" }
+          })
+        });
+
+        const data = await res.json();
+        const output = JSON.parse(data.choices[0].message.content);
+        console.log("LLM Decision:", output);
+        document.getElementById('status-text').textContent = `Agent: ${output.action} ${output.target_move || ''}`;
+
+        if (output.action === "goto_move" && output.target_move) {
+          const target = segments.find(s => s.label === output.target_move);
+          if (target) {
+            // Smoothly navigate to the start of this move
+            loadFrame(target.start);
+            // If they said a move, they usually want to see it play!
+            if (!isPlaying) togglePlay();
+
+            // Highlight in UI
+            document.querySelectorAll('.segment-item').forEach(el => {
+              if (el.textContent.includes(output.target_move)) {
+                el.classList.add('active');
+                el.scrollIntoView({ behavior: "smooth", block: "center" });
+              } else {
+                el.classList.remove('active');
+              }
+            });
+          } else {
+            document.getElementById('status-text').textContent = `Agent Error: move ${output.target_move} not in database.`;
+          }
+        } else if (output.action === "play") {
+          if (!isPlaying) togglePlay();
+        } else if (output.action === "stop") {
+          if (isPlaying) togglePlay();
+        }
+
+      } catch (err) {
+        console.error("GROQ LLM Error:", err);
+        document.getElementById('status-text').textContent = "Error executing LLM intent.";
       }
     }
 
